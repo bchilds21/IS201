@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Trivia Quiz</title>
+    <a href="brenton.html"> Brenton's NFL Page</a>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        #quiz-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .options button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .options button:hover {
+            background: #555;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #timer {
+            font-size: 16px;
+            color: #ff0000;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h1>NFL Trivia Quiz</h1>
+        <div id="quiz">
+            <p id="timer">Time left: 15 seconds</p>
+            <p class="question">Loading question...</p>
+            <div class="options"></div>
+        </div>
+        <div id="result"></div>
+        <button id="next-question" style="display:none;">Next Question</button>
+    </div>
+
+    <script>
+        // Question bank
+        const questions = [
+            { question: "Which NFL team has won the most Super Bowls?", options: ["New England Patriots", "Pittsburgh Steelers", "Dallas Cowboys", "San Francisco 49ers"], answer: "New England Patriots" },
+            { question: "Who holds the record for the most passing touchdowns in a single season?", options: ["Tom Brady", "Peyton Manning", "Drew Brees", "Patrick Mahomes"], answer: "Peyton Manning" },
+            { question: "Which city hosted the first-ever Super Bowl?", options: ["Miami", "New Orleans", "Los Angeles", "Green Bay"], answer: "Los Angeles" },
+            { question: "Which player has the most rushing yards in NFL history?", options: ["Emmitt Smith", "Walter Payton", "Barry Sanders", "Jim Brown"], answer: "Emmitt Smith" },
+            { question: "What team did Brett Favre spend most of his career with?", options: ["Minnesota Vikings", "Atlanta Falcons", "Green Bay Packers", "New York Jets"], answer: "Green Bay Packers" },
+            { question: "Who was the first overall pick in the 2020 NFL Draft?", options: ["Joe Burrow", "Tua Tagovailoa", "Chase Young", "Justin Herbert"], answer: "Joe Burrow" },
+            { question: "Which NFL team is known as 'America's Team'?", options: ["Dallas Cowboys", "New York Giants", "Chicago Bears", "Los Angeles Rams"], answer: "Dallas Cowboys" },
+            { question: "How many points is a touchdown worth?", options: ["5", "6", "7", "3"], answer: "6" },
+            { question: "Who holds the record for the longest field goal in NFL history?", options: ["Matt Prater", "Justin Tucker", "Adam Vinatieri", "Jason Elam"], answer: "Justin Tucker" },
+            { question: "Which team won the Super Bowl in 2020?", options: ["Kansas City Chiefs", "San Francisco 49ers", "Tampa Bay Buccaneers", "New England Patriots"], answer: "Kansas City Chiefs" },
+            { question: "Who is the NFL's all-time leader in receiving touchdowns?", options: ["Jerry Rice", "Randy Moss", "Terrell Owens", "Larry Fitzgerald"], answer: "Jerry Rice" },
+            { question: "Which team has the most losses in NFL history?", options: ["Arizona Cardinals", "Detroit Lions", "New York Jets", "Cleveland Browns"], answer: "Arizona Cardinals" },
+            { question: "What year was the NFL founded?", options: ["1920", "1935", "1946", "1950"], answer: "1920" },
+            { question: "Who is known as the 'Father of American Football'?", options: ["Walter Camp", "Vince Lombardi", "Pop Warner", "George Halas"], answer: "Walter Camp" },
+            { question: "Which quarterback is nicknamed 'The Gunslinger'?", options: ["John Elway", "Dan Marino", "Brett Favre", "Troy Aikman"], answer: "Brett Favre" },
+            { question: "How many teams are in the NFL?", options: ["30", "31", "32", "33"], answer: "32" },
+            { question: "What is the maximum number of points a team can score on a single play?", options: ["6", "8", "10", "12"], answer: "8" },
+            { question: "Which team was the first to go undefeated in an NFL season?", options: ["New England Patriots", "Miami Dolphins", "Green Bay Packers", "Chicago Bears"], answer: "Miami Dolphins" },
+            { question: "Who was the MVP of Super Bowl LV?", options: ["Patrick Mahomes", "Tom Brady", "Rob Gronkowski", "Leonard Fournette"], answer: "Tom Brady" },
+            { question: "What position does Aaron Donald play?", options: ["Quarterback", "Defensive Tackle", "Wide Receiver", "Linebacker"], answer: "Defensive Tackle" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 15;
+
+        const quizElement = document.getElementById('quiz');
+        const resultElement = document.getElementById('result');
+        const nextButton = document.getElementById('next-question');
+        const timerElement = document.getElementById('timer');
+
+        // Load a question
+        function loadQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const questionElement = quizElement.querySelector('.question');
+            const optionsElement = quizElement.querySelector('.options');
+
+            questionElement.textContent = currentQuestion.question;
+            optionsElement.innerHTML = '';
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => {
+                    clearInterval(timer);
+                    checkAnswer(option);
+                };
+                optionsElement.appendChild(button);
+            });
+
+            resultElement.textContent = '';
+            nextButton.style.display = 'none';
+            startTimer();
+        }
+
+        // Start the timer
+        function startTimer() {
+            timeLeft = 15;
+            timerElement.textContent = `Time left: ${timeLeft} seconds`;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Time left: ${timeLeft} seconds`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    resultElement.textContent = 'Time\'s up!';
+                    resultElement.style.color = 'orange';
+                    nextButton.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        // Check the answer
+        function checkAnswer(selectedOption) {
+            const currentQuestion = questions[currentQuestionIndex];
+
+            if (selectedOption === currentQuestion.answer) {
+                resultElement.textContent = 'Correct!';
+                resultElement.style.color = 'green';
+                score++;
+            } else {
+                resultElement.textContent = `Wrong! The correct answer was: ${currentQuestion.answer}`;
+                resultElement.style.color = 'red';
+            }
+
+            nextButton.style.display = 'block';
+        }
+        // Move to the next question
+        nextButton.onclick = () => {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                quizElement.innerHTML = `<h2>Quiz Complete!</h2><p>Your score: ${score} / ${questions.length}</p>`;
+                nextButton.style.display = 'none';
+            }
+        };
+
+        // Start the quiz
+        loadQuestion();
+    </script>
+</body>
+</html>
